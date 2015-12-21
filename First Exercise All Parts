@@ -1,0 +1,577 @@
+#part1
+module part1(SW,LEDR);
+input [9:0] SW;
+output [9:0] LEDR;
+assign LEDR=SW;
+endmodule 
+
+#part1 Testbench
+
+`timescale 1ns/1ns
+module Testbench();
+	reg[9:0] SW_tb;
+	wire[9:0] LEDR_tb;
+	
+	part1 part1_tb(SW_tb,LEDR_tb);
+	
+	initial begin
+	SW_tb[9:0]='b0000000000;// first initial
+	#10
+	if(LEDR_tb != 'b0000000000) begin
+		$display("hata!!! LEDR_tb: %b\n", LEDR_tb);
+		end
+	$display("LEDR_tb: %b\n",LEDR_tb);
+	#10
+	SW_tb[9:0]='b1111111111;// second initial
+	#10
+	if(LEDR_tb != 'b1111111111) begin
+		$display("hata!!! LEDR_tb: %b\n", LEDR_tb);
+		end
+	$display("LEDR_tb: %b\n",LEDR_tb);
+	end
+	endmodule 
+	#part2
+	module part2 (SW, LEDR);
+
+	input [9:0]SW;
+	output [9:0]LEDR;
+
+	wire S;
+	wire [3:0] X, Y, M;
+	
+	assign S = SW[9];
+	assign LEDR[9] = S;
+	assign X = SW[3:0];
+	assign Y = SW[7:4];
+	
+	assign M[0] = (~S & X[0]) | (S & Y[0]);
+	assign M[1] = (~S & X[1]) | (S & Y[1]);
+	assign M[2] = (~S & X[2]) | (S & Y[2]);
+	assign M[3] = (~S & X[3]) | (S & Y[3]);
+	
+	assign LEDR[3:0] = M[3:0];
+	assign LEDR[8:4] = 'b00000;
+	
+endmodule 
+
+#part2 Testbench
+
+`timescale 1ns/1ns
+module Testbench();
+	reg [9:0] SW_tb;
+	wire [9:0] LEDR_tb;
+	
+part2 part2_tb(SW_tb,LEDR_tb);
+	
+	initial begin
+	
+	
+		SW_tb[9]='b0;// first initial will give x value
+		SW_tb[3:0]='b0000;// x's value
+		SW_tb[7:4]='b0000;//y's value
+		SW_tb[8]='b0;//that led is free that's why gave it 0
+		#10
+			if(LEDR_tb[3:0] != 'b0000) begin
+				$display("hata !! LEDR_tb: %b \n",LEDR_tb[3:0]);
+			end
+			$display("LEDR_tb: %b\n",LEDR_tb[3:0]);
+		#10 
+		SW_tb[9]='b1;// second sittuation
+		SW_tb[3:0]='b0000;// x's value
+		SW_tb[7:4]='b0000;//y's value
+		SW_tb[8]='b0;//that led is free that's why gave it 0
+		#10
+			if(LEDR_tb[3:0] != 'b0000) begin
+				$display("hata !! LEDR_tb: %b \n",LEDR_tb[3:0]);
+			end
+			$display("LEDR_tb: %b\n",LEDR_tb[3:0]);
+		#10
+		SW_tb[9]='b0;//third sittuation will give x value
+		SW_tb[3:0]='b1111;//x's value
+		SW_tb[7:4]='b0000;//y's value
+		SW_tb[8]='b0;//that led is free that's why gave it 0
+		#10
+		if(LEDR_tb[3:0] != 'b1111) begin
+				$display("hata !! LEDR_tb: %b \n",LEDR_tb[3:0]);
+			end
+			$display("LEDR_tb: %b\n",LEDR_tb[3:0]);
+		#10 
+		SW_tb[9]='b1;// fourth sittuation will give y's value 
+		SW_tb[3:0]='b0000;//x's value
+		SW_tb[7:4]='b1111;//y's value
+		SW_tb[8]='b0;//that led is free that's why gave it 0
+		#10
+		if(LEDR_tb[3:0] != 'b1111) begin
+				$display("hata !! LEDR_tb: %b \n",LEDR_tb[3:0]);
+			end
+			$display("LEDR_tb: %b\n",LEDR_tb[3:0]);
+		end
+		endmodule 
+
+#part3
+
+module part3 (SW, LEDR);
+	
+	input [9:0]SW;
+	output [9:0]LEDR;
+
+	wire [1:0] M,S,U,V,W,temp_var;
+	assign S[1:0] = SW[9:8];
+	
+	assign U = SW[1:0];
+	assign V = SW[3:2];
+	assign W = SW[5:4];
+	
+	assign temp_var[0] = (~S[0] & U[0]) | (S[0] & V[0]);// first mux output first element
+	assign M[0] = (~S[1] & temp_var[0]) | (S[1] & W[0]);// second mux output first element(main)
+	
+	assign temp_var[1] = (~S[0] & U[1]) | (S[0] & V[1]);//first mux output second element
+   assign M[1] = (~S[1]& temp_var[1]) | (S[1] & W[1]); // second mux output second element(main)
+   
+	assign LEDR[1:0] = M;
+
+endmodule 
+
+#part3 Testbench
+
+`timescale 1 ns / 1 ns
+module Testbench();
+
+reg [9:0]SW_tb;
+wire [9:0] LEDR_tb;
+
+part3 part3_tb(SW_tb,LEDR_tb);
+
+
+initial begin
+	SW_tb[1:0]=00; //U sayısı
+	SW_tb[3:2]=00; //V sayısı
+	SW_tb[5:4]=00; //W sayısı
+	SW_tb[9:8]=00; // kontrol switchleri
+	#10
+	if(LEDR_tb != 'b00) begin
+		$display("hata !! LEDR_tb: %b\n",LEDR_tb[1:0]);
+	end
+		$display("LEDR_tb: %b\n",LEDR_tb[1:0]);
+	
+	#10 //U sayısı çıkacak
+	SW_tb[1:0]=11; //U sayısı
+	SW_tb[3:2]=00; //V sayısı
+	SW_tb[5:4]=00; //W sayısı
+	SW_tb[9:8]=00; // kontrol switchleri
+	#10
+	if(LEDR_tb != 'b11) begin
+		$display("hata !! LEDR_tb: %b\n",LEDR_tb[1:0]);
+	end
+		$display("LEDR_tb: %b\n",LEDR_tb[1:0]);
+	#10 //V sayısı çıkacak
+	SW_tb[1:0]=00; //U sayısı
+	SW_tb[3:2]=11; //V sayısı
+	SW_tb[5:4]=00; //W sayısı
+	SW_tb[9:8]=01; // kontrol switchleri
+	#10
+	if(LEDR_tb != 'b11) begin
+		$display("hata !! LEDR_tb: %b\n",LEDR_tb[1:0]);
+	end
+		$display("LEDR_tb: %b\n",LEDR_tb[1:0]);
+	#10 //W sayısı çıkacak
+	SW_tb[1:0]=00; //U sayısı
+	SW_tb[3:2]=00; //V sayısı
+	SW_tb[5:4]=11; //W sayısı
+	SW_tb[9:8]=10; // kontrol switchleri
+	#10
+	if(LEDR_tb != 'b11) begin
+		$display("hata !! LEDR_tb: %b\n",LEDR_tb[1:0]);
+	end
+		$display("LEDR_tb: %b\n",LEDR_tb[1:0]);
+	end
+	endmodule
+
+	#part 4
+
+	module part4(SW, HEX0);
+
+	input [1:0]SW;
+	output [0:6]HEX0;
+	
+	wire c0, c1;
+	assign c0 = SW[0];
+	assign c1 = SW[1];
+	
+
+	assign HEX0[0] = (~c0&~c1)|c1;
+	assign HEX0[1] = c0;
+	assign HEX0[2] = c0;
+	assign HEX0[3] = c1;
+	assign HEX0[4] = c1;
+	assign HEX0[5] =(~c0&~c1)|c1;
+	assign HEX0[6] = c1;
+	
+endmodule
+
+#part 4 Testbench
+
+`timescale 1ns/1ns
+module Testbench();
+
+reg [1:0] SW_tb;
+wire [0:6] HEX0_tb;
+
+part4 part4_tb(SW_tb,HEX0_tb);
+
+   assign HEX0_tb[0] = (~SW_tb[0]&~SW_tb[1])|SW_tb[1];
+	assign HEX0_tb[1] = SW_tb[0];
+	assign HEX0_tb[2] = SW_tb[0];
+	assign HEX0_tb[3] = SW_tb[1];
+	assign HEX0_tb[4] = SW_tb[1];
+	assign HEX0_tb[5] =(~SW_tb[0]&~SW_tb[1])|SW_tb[1];
+	assign HEX0_tb[6] = SW_tb[1];
+	
+	initial begin 
+	SW_tb[1:0]=2'b00;//d çıkışını verecek
+	#10
+	SW_tb[1:0]=2'b01;//E çıkışını verecek
+	#10
+	SW_tb[1:0]=2'b10;//1 çıkışını verecek
+	#10
+	SW_tb[1:0]=2'b00;//d çıkışını verecek
+	end
+	endmodule 
+
+#part 5
+
+module part5 (SW,LEDR,HEX0,HEX1,HEX2);
+	input [9:0] SW; // toggle switches
+	output [9:0] LEDR;//red lights
+	output [0:6] HEX0,HEX1,HEX2; // 7-seg displays
+	
+	wire [1:0] M0,M1,M2;
+	
+	assign LEDR = SW;
+	mux_2bit_3to1 U0(SW[9:8], SW[5:4], SW[3:2], SW[1:0], M0);// first order will give output m0
+	mux_2bit_3to1 U1(SW[9:8], SW[3:2], SW[1:0], SW[5:4], M1);// second order will give output m1
+	mux_2bit_3to1 U2(SW[9:8], SW[1:0], SW[5:4], SW[3:2], M2);// third order will give output m2
+	// that orders will provide to send data to display module with different orders
+	char_7seg H0(M2, HEX0);// last output will give first disp
+	char_7seg H1(M1, HEX1);// middle output will give midlle disp
+	char_7seg H2(M0, HEX2);// first output will give last disp
+endmodule
+module mux_2bit_3to1(S, U, V, W, M);
+	input [1:0] S, U, V, W;
+   output [1:0] M ;
+	
+	wire [1:0] temp_var;   // temp_var
+		  
+	
+	assign temp_var[0] = (~S[0] & U[0]) | (S[0] & V[0]);
+	assign M[0] = (~S[1] & temp_var[0]) | (S[1] & W[0]);  
+	
+	assign temp_var[1] = (~S[0] & U[1]) | (S[0] & V[1]);
+   assign M[1] = (~S[1]& temp_var[1]) | (S[1] & W[1]); 
+endmodule
+module char_7seg (C, Display);
+	input [1:0] C; // input code
+	output [0:6] Display; // output 7-seg code
+	
+	
+	wire c0, c1;
+	
+	assign c0 = C[0];
+	assign c1 = C[1];
+	
+	assign Display[0] = (~c0&~c1)|c1;
+	assign Display[1] = c0;
+	assign Display[2] = c0;
+	assign Display[3] = c1;
+	assign Display[4] = c1;
+	assign Display[5] =(~c0&~c1)|c1;
+	assign Display[6] = c1;
+endmodule 
+
+#part 5 Testbench
+
+`timescale 1ns/1ns
+module Testbench();
+reg [9:0] SW_tb;
+wire [0:6] HEX0_tb,HEX1_tb,HEX2_tb;
+wire [9:0] LEDR_tb;
+
+part5 part5_tb(SW_tb,LEDR_tb,HEX0_tb,HEX1_tb,HEX2_tb);
+
+initial begin
+	SW_tb[9:8]=2'b00;//first sittuation will give d E 1
+	SW_tb[1:0]=2'b10;//first value initial
+	SW_tb[3:2]=2'b01;//first value initial
+	SW_tb[5:4]=2'b00;//first value initial
+	SW_tb[7:6]=2'b00;//first value initial
+	#10
+	$display("First state\n");	
+	if (HEX0_tb != 'b1001111) begin
+		$display("hata!!! HEX0_tb: %b\n", HEX0_tb);
+	end
+	else if(HEX1_tb != 'b0110000)begin
+		$display("hata!!! HEX1_tb: %b\n", HEX1_tb);
+		end
+	else if(HEX2_tb != 'b1000010) begin
+		$display("hata!! HEX2_tb: %b\n", HEX2_tb);
+		end
+	
+	$display("Hex0_tb: %b\n", HEX0_tb);
+	$display("HEX1_tb: %b\n", HEX1_tb);
+	$display("HEX2_tb: %b\n", HEX2_tb);
+	#10
+	SW_tb[9:8]=2'b01;//second sittuation will give E 1 d
+	#10
+	$display("Second state\n");
+	if(HEX0_tb!='b1000010)begin
+		$display("hata!!! HEX0_tb: %b\n",HEX0_tb);
+		end
+	else if(HEX1_tb!='b1001111)begin
+		$display("hata!!! HEX1_tb: %b\n",HEX1_tb);
+		end
+	else	if(HEX2_tb!='b0110000)begin
+		$display("hata!!! HEX2_tb: %b\n",HEX2_tb);
+		end
+	$display("HEX0_tb: %b\n",HEX0_tb);
+	$display("HEX1_tb: %b\n", HEX1_tb);
+	$display("HEX2_tb: %b\n", HEX2_tb);
+	#10
+	SW_tb[9:8]=2'b10;// third sittuation will give 1 d E
+	#10
+	$display("Third state\n");
+	if(HEX0_tb!='b0110000)begin
+		$display("hata!!! HEX0_tb: %b\n",HEX0_tb);
+		end
+	else if(HEX1_tb!='b1000010)begin
+		$display("hata!!! HEX1_tb: %b\n",HEX1_tb);
+		end
+	else	if(HEX2_tb!='b1001111)begin
+		$display("hata!!! HEX2_tb: %b\n",HEX2_tb);
+		end
+	$display("HEX0_tb: %b\n",HEX0_tb);
+	$display("HEX1_tb: %b\n", HEX1_tb);
+	$display("HEX2_tb: %b\n", HEX2_tb);
+	
+	end
+	endmodule
+
+	#part6
+
+	module part6 (SW,LEDR,HEX0,HEX1,HEX2,HEX3,HEX4,HEX5);
+	input [9:0] SW; // toggle switches
+	output [9:0] LEDR;//red lights
+	output [0:6] HEX0,HEX1,HEX2,HEX3,HEX4,HEX5; // 7-seg displays
+	
+	wire [1:0] M0,M1,M2,M3,M4,M5;
+	
+	assign LEDR = SW;
+	mux_2bit_6to1 U0(SW[9:7], ~SW[5:4], ~SW[5:4], ~SW[5:4], SW[5:4], SW[3:2], SW[1:0], M0);
+	mux_2bit_6to1 U1(SW[9:7], ~SW[5:4], ~SW[5:4], SW[5:4], SW[3:2], SW[1:0], ~SW[5:4], M1);
+	mux_2bit_6to1 U2(SW[9:7], ~SW[5:4], SW[5:4], SW[3:2], SW[1:0], ~SW[5:4], ~SW[5:4], M2);
+	mux_2bit_6to1 U3(SW[9:7], SW[5:4], SW[3:2], SW[1:0], ~SW[5:4], ~SW[5:4], ~SW[5:4], M3);
+	mux_2bit_6to1 U4(SW[9:7], SW[3:2], SW[1:0], ~SW[5:4], ~SW[5:4], ~SW[5:4], SW[5:4], M4);
+	mux_2bit_6to1 U5(SW[9:7], SW[1:0], ~SW[5:4], ~SW[5:4], ~SW[5:4], SW[5:4], SW[3:2], M5);
+	
+	char_7seg H0(M5, HEX0);
+	char_7seg H1(M4, HEX1);
+	char_7seg H2(M3, HEX2);
+	char_7seg H3(M2, HEX3);
+	char_7seg H4(M1, HEX4);
+	char_7seg H5(M0, HEX5);
+endmodule
+module mux_2bit_6to1(S, U, V, W, X, Y, Z, M);
+	input [1:0] U, V, W, X, Y, Z;
+	input [2:0] S;
+   output [1:0] M ;
+		  
+	// Broke up Multiplexers by parts, as referenced in figure 4, just with 3-bit wide inputs
+	
+	assign M[0] = (U[0]&~S[0]&~S[1]&~S[2]) | (V[0]&S[0]&~S[1]&~S[2])| (W[0]&~S[0]&S[1]&~S[2]) |
+                 (X[0]&S[0]&S[1]&~S[2]) | (Y[0]&~S[0]&~S[1]&S[2]) | (Z[0]&S[0]&~S[1]&S[2]);
+	
+	assign M[1] = (U[1]&~S[0]&~S[1]&~S[2]) | (V[1]&S[0]&~S[1]&~S[2])| (W[1]&~S[0]&S[1]&~S[2]) |
+                 (X[1]&S[0]&S[1]&~S[2]) | (Y[1]&~S[0]&~S[1]&S[2]) | (Z[1]&S[0]&~S[1]&S[2]);
+endmodule
+module char_7seg (C, Display);
+	input [1:0] C; // input code
+	output [0:6] Display; // output 7-seg code
+	
+	wire c0, c1;
+	
+	assign c0 = C[0];
+	assign c1 = C[1];
+	
+	assign Display[0] = (~c0&~c1)|c1;
+	assign Display[1] = c0;
+	assign Display[2] = c0;
+	assign Display[3] = c1;
+	assign Display[4] = c1;
+	assign Display[5] =(~c0&~c1)|c1;
+	assign Display[6] = c1;
+endmodule 
+
+#part6 Testbench
+
+`timescale 1ns/1ns
+module Testbench();
+reg [9:0] SW_tb;
+wire [9:0] LEDR_tb;
+wire [0:6] HEX0_tb,HEX1_tb,HEX2_tb,HEX3_tb,HEX4_tb,HEX5_tb;
+
+part6 part6_tb(SW_tb,LEDR_tb,HEX0_tb,HEX1_tb,HEX2_tb,HEX3_tb,HEX4_tb,HEX5_tb);
+
+initial begin
+	SW_tb[9:7]='b000;// first value initial
+	SW_tb[1:0]=2'b10;//first value initial
+	SW_tb[3:2]=2'b01;//first value initial
+	SW_tb[5:4]=2'b00;//first value initial
+	SW_tb[7:6]=2'b00;//first value initial
+	#10
+	$display("First state\n");	
+	if (HEX0_tb != 'b1001111) begin
+		$display("hata!!! HEX0_tb: %b\n", HEX0_tb);
+	end
+	else if(HEX1_tb != 'b0110000)begin
+		$display("hata!!! HEX1_tb: %b\n", HEX1_tb);
+		end
+	else if(HEX2_tb != 'b1000010) begin
+		$display("hata!! HEX2_tb: %b\n", HEX2_tb);
+		end
+	else if(HEX3_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX3_tb);
+		end
+	else if(HEX4_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX4_tb);
+		end
+	else if(HEX5_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX5_tb);
+		end
+	
+	$display("Hex0_tb: %b\n", HEX0_tb);
+	$display("HEX1_tb: %b\n", HEX1_tb);
+	$display("HEX2_tb: %b\n", HEX2_tb);
+	$display("HEX3_tb: %b\n", HEX3_tb);
+	$display("HEX4_tb: %b\n", HEX4_tb);
+	$display("HEX5_tb: %b\n", HEX5_tb);
+	#10
+	SW_tb[9:7]='b001;// second sittuation
+	#10
+		$display("Second state\n");	
+	if (HEX1_tb != 'b1001111) begin
+		$display("hata!!! HEX0_tb: %b\n", HEX0_tb);
+	end
+	else if(HEX2_tb != 'b0110000)begin
+		$display("hata!!! HEX1_tb: %b\n", HEX1_tb);
+		end
+	else if(HEX3_tb != 'b1000010) begin
+		$display("hata!! HEX2_tb: %b\n", HEX2_tb);
+		end
+	else if(HEX4_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX3_tb);
+		end
+	else if(HEX5_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX4_tb);
+		end
+	else if(HEX0_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX5_tb);
+		end
+	
+	$display("Hex0_tb: %b\n", HEX0_tb);
+	$display("HEX1_tb: %b\n", HEX1_tb);
+	$display("HEX2_tb: %b\n", HEX2_tb);
+	$display("HEX3_tb: %b\n", HEX3_tb);
+	$display("HEX4_tb: %b\n", HEX4_tb);
+	$display("HEX5_tb: %b\n", HEX5_tb);
+	
+	#10
+		SW_tb[9:7]='b011;//third sittuation
+	#10
+				$display("Third state\n");	
+	if (HEX3_tb != 'b1001111) begin
+		$display("hata!!! HEX0_tb: %b\n", HEX0_tb);
+	end
+	else if(HEX4_tb != 'b0110000)begin
+		$display("hata!!! HEX1_tb: %b\n", HEX1_tb);
+		end
+	else if(HEX5_tb != 'b1000010) begin
+		$display("hata!! HEX2_tb: %b\n", HEX2_tb);
+		end
+	else if(HEX0_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX3_tb);
+		end
+	else if(HEX1_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX4_tb);
+		end
+	else if(HEX2_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX5_tb);
+		end
+	
+	$display("Hex0_tb: %b\n", HEX0_tb);
+	$display("HEX1_tb: %b\n", HEX1_tb);
+	$display("HEX2_tb: %b\n", HEX2_tb);
+	$display("HEX3_tb: %b\n", HEX3_tb);
+	$display("HEX4_tb: %b\n", HEX4_tb);
+	$display("HEX5_tb: %b\n", HEX5_tb);
+	#10
+		SW_tb[9:7]='b100;// fourth sittuation
+	#10
+				$display("Fourth state\n");	
+	if (HEX4_tb != 'b1001111) begin
+		$display("hata!!! HEX0_tb: %b\n", HEX0_tb);
+	end
+	else if(HEX5_tb != 'b0110000)begin
+		$display("hata!!! HEX1_tb: %b\n", HEX1_tb);
+		end
+	else if(HEX0_tb != 'b1000010) begin
+		$display("hata!! HEX2_tb: %b\n", HEX2_tb);
+		end
+	else if(HEX1_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX3_tb);
+		end
+	else if(HEX2_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX4_tb);
+		end
+	else if(HEX3_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX5_tb);
+		end
+	
+	$display("Hex0_tb: %b\n", HEX0_tb);
+	$display("HEX1_tb: %b\n", HEX1_tb);
+	$display("HEX2_tb: %b\n", HEX2_tb);
+	$display("HEX3_tb: %b\n", HEX3_tb);
+	$display("HEX4_tb: %b\n", HEX4_tb);
+	$display("HEX5_tb: %b\n", HEX5_tb);
+	
+	#10
+		SW_tb[9:7]='b101;// fifth sittuation
+	#10
+				$display("Fifth state\n");	
+	if (HEX5_tb != 'b1001111) begin
+			$display("hata!!! HEX0_tb: %b\n", HEX0_tb);
+		end
+	else if(HEX0_tb != 'b0110000)begin
+		$display("hata!!! HEX1_tb: %b\n", HEX1_tb);
+		end
+	else if(HEX1_tb != 'b1000010) begin
+		$display("hata!! HEX2_tb: %b\n", HEX2_tb);
+		end
+	else if(HEX2_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX3_tb);
+		end
+	else if(HEX3_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX4_tb);
+		end
+	else if(HEX4_tb != 'b1111111)begin
+		$display("hata!! HEX3_tb: %b\n",HEX5_tb);
+		end
+	
+	$display("Hex0_tb: %b\n", HEX0_tb);
+	$display("HEX1_tb: %b\n", HEX1_tb);
+	$display("HEX2_tb: %b\n", HEX2_tb);
+	$display("HEX3_tb: %b\n", HEX3_tb);
+	$display("HEX4_tb: %b\n", HEX4_tb);
+	$display("HEX5_tb: %b\n", HEX5_tb);
+	
+	end
+endmodule
+
